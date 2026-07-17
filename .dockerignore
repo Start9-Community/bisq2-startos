@@ -1,0 +1,6 @@
+# Allowlist style: ignore everything, then re-include only what the image build needs
+# (the Dockerfile only COPYs docker_entrypoint.sh and write-stats.sh).
+*
+!Dockerfile
+!docker_entrypoint.sh
+!write-stats.sh

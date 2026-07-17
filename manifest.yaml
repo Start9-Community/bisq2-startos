@@ -1,0 +1,110 @@
+# NOTE: StartOS package ids must match [a-z-]+ (NO digits), so this is `bisq-node`, not `bisq2-node`.
+# The user-facing title stays "Bisq 2 Node".
+id: bisq-node
+title: "Bisq 2 Node"
+version: 2.1.11.1
+release-notes: |
+  First StartOS release of Bisq 2 Node.
+  - Self-hosted Bisq 2 node for the Bisq Connect mobile app.
+  - Reaches the Bisq P2P network over its own bundled Tor.
+  - Surfaces the pairing code (with a scannable QR) + onion address as service properties.
+  - Web UI (over Tor/LAN) showing the pairing code/QR and node status.
+license: AGPL-3.0
+wrapper-repo: "https://github.com/bisq-network/bisq2-startos"
+upstream-repo: "https://github.com/bisq-network/bisq2"
+support-site: "https://github.com/bisq-network/bisq-mobile/issues"
+marketing-site: "https://bisq.network"
+build: ["make"]
+description:
+  short: Self-hosted Bisq 2 node for the Bisq Connect mobile app
+  long: |
+    Run your own Bisq 2 node so the Bisq Connect mobile app connects to a node you control
+    instead of a stranger's — more privacy, no third-party trust. The node is headless and
+    reaches the Bisq P2P network over its own bundled Tor. Open the service to see its status
+    and a pairing QR code / code to pair from Bisq Connect.
+
+    Heads up: the pairing code grants trade control of your node — keep it private.
+assets:
+  license: LICENSE
+  icon: icon.png
+  instructions: instructions.md
+main:
+  type: docker
+  image: main
+  entrypoint: "docker_entrypoint.sh"
+  args: []
+  mounts:
+    main: /data
+  gpu-acceleration: false
+hardware-requirements:
+  arch:
+    - x86_64
+    - aarch64
+# Health: the node has bootstrapped enough to pair once it has written the pairing file.
+health-checks:
+  pairing-ready:
+    name: Pairing ready
+    success-message: The node is up and a pairing code is available
+    type: script
+config: ~
+# Properties surface the pairing code (with QR) + onion, read from stats.yaml the container writes.
+properties:
+  type: script
+volumes:
+  main:
+    type: data
+# The mobile app pairs over bisq2's OWN embedded Tor onion (encoded in the pairing code), but
+# StartOS also fronts a small web UI so the owner can view the pairing code/QR + node status in
+# a browser over Tor or LAN. nginx in the container serves it on :8091.
+interfaces:
+  main:
+    name: Pairing & Status
+    description: View the node's pairing code (with a scannable QR) and status. Pair Bisq Connect from here.
+    tor-config:
+      port-mapping:
+        80: "8091"
+    lan-config:
+      443:
+        ssl: true
+        internal: 8091
+    ui: true
+    protocols:
+      - tcp
+      - http
+dependencies: {}
+backup:
+  create:
+    type: docker
+    image: compat
+    system: true
+    entrypoint: compat
+    args:
+      - duplicity
+      - create
+      - /mnt/backup
+      - /data
+    mounts:
+      BACKUP: "/mnt/backup"
+      main: "/data"
+  restore:
+    type: docker
+    image: compat
+    system: true
+    entrypoint: compat
+    args:
+      - duplicity
+      - restore
+      - /mnt/backup
+      - /data
+    mounts:
+      BACKUP: "/mnt/backup"
+      main: "/data"
+migrations:
+  from:
+    "*":
+      type: script
+      args: ["from"]
+  to:
+    "*":
+      type: script
+      args: ["to"]
