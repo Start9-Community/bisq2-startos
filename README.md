@@ -27,7 +27,7 @@ marketplace directly.
 
 1. Start the service and give it a minute to bootstrap over Tor.
 2. Open the service's **Properties** — you'll see a **Pairing Code** (with a scannable
-   QR) and the node's **Tor Onion Address**.
+   QR). The code already encodes the node's onion address, so Bisq Connect needs nothing else.
 3. In the [Bisq Connect](https://github.com/bisq-network/bisq-mobile) mobile app, scan
    the QR — or copy the pairing code into **More → Trusted node setup → Pair with a new
    trusted node**.
@@ -44,7 +44,7 @@ marketplace directly.
 | `manifest.yaml` | Service manifest — metadata, multi-arch (`x86_64` + `aarch64`), health check, properties, backup, migrations |
 | `Dockerfile` | Wraps the published, digest-pinned `bisq2-api` node image with the StartOS entrypoint layer |
 | `docker_entrypoint.sh` | StartOS entrypoint — keeps Properties in sync, then hands off to the node image's own entrypoint |
-| `write-stats.sh` | Parses the node's pairing file into `stats.yaml` (pairing code + QR + onion) for the Properties view |
+| `write-stats.sh` | Parses the node's pairing file into `stats.yaml` (pairing code + QR) for the Properties view |
 | `scripts/embassy.ts` | Service procedures — health check, properties, config, migrations |
 | `Makefile` | Builds the multi-arch `.s9pk` (`start-sdk pack`) |
 | `instructions.md` | In-app instructions shown in StartOS |

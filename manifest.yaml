@@ -7,8 +7,8 @@ release-notes: |
   First StartOS release of Bisq 2 Node.
   - Self-hosted Bisq 2 node for the Bisq Connect mobile app.
   - Reaches the Bisq P2P network over its own bundled Tor.
-  - Surfaces the pairing code (with a scannable QR) + onion address as service properties.
-  - Web UI (over Tor/LAN) showing the pairing code/QR and node status.
+  - Surfaces the pairing code (with a scannable QR) as a service property (the code encodes the node's onion address).
+  - Web UI (over Tor) showing the pairing code/QR and node status.
 license: AGPL-3.0
 wrapper-repo: "https://github.com/bisq-network/bisq2-startos"
 upstream-repo: "https://github.com/bisq-network/bisq2"
@@ -47,7 +47,7 @@ health-checks:
     success-message: The node is up and a pairing code is available
     type: script
 config: ~
-# Properties surface the pairing code (with QR) + onion, read from stats.yaml the container writes.
+# Properties surface the pairing code (with QR), read from stats.yaml the container writes.
 properties:
   type: script
 volumes:
@@ -55,7 +55,13 @@ volumes:
     type: data
 # The mobile app pairs over bisq2's OWN embedded Tor onion (encoded in the pairing code), but
 # StartOS also fronts a small web UI so the owner can view the pairing code/QR + node status in
-# a browser over Tor or LAN. nginx in the container serves it on :8091.
+# a browser over Tor. nginx in the container serves it on :8091.
+#
+# Tor-only, by design: the UI serves the live pairing code (a bearer token that grants trade
+# control) with no auth of its own, so it must NOT be reachable by network position. A LAN binding
+# would let any device on the same network read the code; the Tor onion is an owner-private
+# capability URL instead. The pairing code is also available in the (authenticated) StartOS
+# Properties, so this UI is a convenience, not the only path.
 interfaces:
   main:
     name: Pairing & Status
@@ -63,10 +69,6 @@ interfaces:
     tor-config:
       port-mapping:
         80: "8091"
-    lan-config:
-      443:
-        ssl: true
-        internal: 8091
     ui: true
     protocols:
       - tcp
