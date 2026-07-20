@@ -8,7 +8,6 @@ release-notes: |
   - Self-hosted Bisq 2 node for the Bisq Connect mobile app.
   - Reaches the Bisq P2P network over its own bundled Tor.
   - Surfaces the pairing code (with a scannable QR) as a service property (the code encodes the node's onion address).
-  - Web UI (over Tor) showing the pairing code/QR and node status.
 license: AGPL-3.0
 wrapper-repo: "https://github.com/bisq-network/bisq2-startos"
 upstream-repo: "https://github.com/bisq-network/bisq2"
@@ -20,8 +19,8 @@ description:
   long: |
     Run your own Bisq 2 node so the Bisq Connect mobile app connects to a node you control
     instead of a stranger's — more privacy, no third-party trust. The node is headless and
-    reaches the Bisq P2P network over its own bundled Tor. Open the service to see its status
-    and a pairing QR code / code to pair from Bisq Connect.
+    reaches the Bisq P2P network over its own bundled Tor. Open the service's Properties to
+    see the pairing QR code / code to pair from Bisq Connect.
 
     Heads up: the pairing code grants trade control of your node — keep it private.
 assets:
@@ -53,26 +52,12 @@ properties:
 volumes:
   main:
     type: data
-# The mobile app pairs over bisq2's OWN embedded Tor onion (encoded in the pairing code), but
-# StartOS also fronts a small web UI so the owner can view the pairing code/QR + node status in
-# a browser over Tor. nginx in the container serves it on :8091.
-#
-# Tor-only, by design: the UI serves the live pairing code (a bearer token that grants trade
-# control) with no auth of its own, so it must NOT be reachable by network position. A LAN binding
-# would let any device on the same network read the code; the Tor onion is an owner-private
-# capability URL instead. The pairing code is also available in the (authenticated) StartOS
-# Properties, so this UI is a convenience, not the only path.
-interfaces:
-  main:
-    name: Pairing & Status
-    description: View the node's pairing code (with a scannable QR) and status. Pair Bisq Connect from here.
-    tor-config:
-      port-mapping:
-        80: "8091"
-    ui: true
-    protocols:
-      - tcp
-      - http
+# Headless by design — no interfaces. The mobile app pairs over bisq2's OWN embedded Tor onion
+# (encoded in the pairing code); nothing here needs to be reachable from a browser. The pairing
+# code is a bearer token that grants trade control, so it is surfaced ONLY through the
+# authenticated StartOS Properties view (with a scannable QR) — an unauthenticated web page
+# serving it would make network position (or a leaked onion URL) equal trade control.
+interfaces: {}
 dependencies: {}
 backup:
   create:

@@ -9,8 +9,8 @@
 #
 # The pairing code is the raw first chunk of pairing_qr_code.txt (base64url, no decode needed).
 # We deliberately do NOT derive the onion here: it is encoded (length-prefixed, URL-safe base64)
-# inside the code and the web UI decodes it properly client-side — a shell base64/grep decode of
-# that binary structure is unreliable.
+# inside the code and the mobile app decodes it properly — a shell base64/grep decode of that
+# binary structure is unreliable.
 set -eu
 
 PAIRING_FILE="/data/pairing_qr_code.txt"
