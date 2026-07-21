@@ -5,13 +5,14 @@ a self-hosted [Bisq 2](https://github.com/bisq-network/bisq2) node for the
 [Bisq Connect](https://github.com/bisq-network/bisq-mobile) mobile app.
 
 Run your own node so Bisq Connect talks to a node **you** control instead of a
-stranger's — more privacy, no third-party trust. The node is headless and reaches
-the Bisq P2P network over its own bundled Tor. StartOS surfaces the node's pairing
-code (with a scannable QR) as a service **Property**.
+stranger's — more privacy, no third-party trust. The node reaches the Bisq P2P
+network over its own bundled Tor. StartOS surfaces the node's pairing code (with a
+scannable QR) as a service **Property**.
 
-> **Scope:** this packages the **headless trusted node** for Bisq Connect — not the
-> full Bisq 2 desktop application. There is no web UI: pairing happens via the
-> authenticated StartOS **Properties** view.
+> **Scope:** this packages the **trusted node** for Bisq Connect — not the full
+> Bisq 2 desktop application. The service page is a read-only **status** page;
+> pairing happens via the authenticated StartOS **Properties** view (the pairing
+> code is never shown on the status page).
 
 ## Install
 

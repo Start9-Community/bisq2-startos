@@ -1,8 +1,8 @@
 # Bisq 2 Node
 
 Run your own Bisq 2 node so the **Bisq Connect** mobile app connects to a node you control instead
-of a stranger's — more privacy, no third-party trust. The node is headless and reaches the Bisq P2P
-network over its own bundled Tor.
+of a stranger's — more privacy, no third-party trust. The node reaches the Bisq P2P network over its
+own bundled Tor. The service page is a read-only status view; pairing is done from **Properties**.
 
 ## Pairing with Bisq Connect
 

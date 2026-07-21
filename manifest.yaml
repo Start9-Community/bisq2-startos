@@ -8,6 +8,7 @@ release-notes: |
   - Self-hosted Bisq 2 node for the Bisq Connect mobile app.
   - Reaches the Bisq P2P network over its own bundled Tor.
   - Surfaces the pairing code (with a scannable QR) as a service property (the code encodes the node's onion address).
+  - A read-only status page over Tor; the pairing code is shown only in the authenticated Properties view, never on the page.
 license: AGPL-3.0
 wrapper-repo: "https://github.com/bisq-network/bisq2-startos"
 upstream-repo: "https://github.com/bisq-network/bisq2"
@@ -18,9 +19,9 @@ description:
   short: Self-hosted Bisq 2 node for the Bisq Connect mobile app
   long: |
     Run your own Bisq 2 node so the Bisq Connect mobile app connects to a node you control
-    instead of a stranger's — more privacy, no third-party trust. The node is headless and
-    reaches the Bisq P2P network over its own bundled Tor. Open the service's Properties to
-    see the pairing QR code / code to pair from Bisq Connect.
+    instead of a stranger's — more privacy, no third-party trust. The node reaches the Bisq P2P
+    network over its own bundled Tor. Open the service's Properties to see the pairing QR code /
+    code to pair from Bisq Connect; the service page itself is a read-only status view.
 
     Heads up: the pairing code grants trade control of your node — keep it private.
 assets:
@@ -52,12 +53,21 @@ properties:
 volumes:
   main:
     type: data
-# Headless by design — no interfaces. The mobile app pairs over bisq2's OWN embedded Tor onion
-# (encoded in the pairing code); nothing here needs to be reachable from a browser. The pairing
-# code is a bearer token that grants trade control, so it is surfaced ONLY through the
-# authenticated StartOS Properties view (with a scannable QR) — an unauthenticated web page
-# serving it would make network position (or a leaked onion URL) equal trade control.
-interfaces: {}
+# A single static status/landing page over Tor (see web/index.html), served by nginx on :8091.
+# It shows NO secrets: pairing is done via the authenticated StartOS Properties view, and this page
+# deliberately has no route to the pairing file. The pairing code is a bearer token that grants
+# trade control, so it is never exposed to network position or a leaked onion URL.
+interfaces:
+  main:
+    name: Status
+    description: A read-only status page. Pairing is done from the service's Properties — the pairing code is never shown here.
+    tor-config:
+      port-mapping:
+        80: "8091"
+    ui: true
+    protocols:
+      - tcp
+      - http
 dependencies: {}
 backup:
   create:

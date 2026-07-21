@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bisq 2 Node</title>
+    <style>
+        :root { color-scheme: light dark; }
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            max-width: 40rem;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem;
+            line-height: 1.6;
+        }
+        h1 { font-size: 1.6rem; margin-bottom: 0.25rem; }
+        .status { color: #2e7d32; font-weight: 600; }
+        .note {
+            border-left: 4px solid #c9a227;
+            padding: 0.6rem 1rem;
+            margin: 1.5rem 0;
+            background: rgba(201, 162, 39, 0.08);
+        }
+        code { background: rgba(127, 127, 127, 0.15); padding: 0.1rem 0.35rem; border-radius: 4px; }
+        a { color: #1565c0; }
+        footer { margin-top: 2.5rem; font-size: 0.85rem; opacity: 0.7; }
+    </style>
+</head>
+<body>
+    <h1>Bisq 2 Node</h1>
+    <p class="status">Your trusted node is running.</p>
+
+    <p>
+        This is your own headless Bisq 2 node. The
+        <a href="https://github.com/bisq-network/bisq-mobile">Bisq Connect</a> mobile app pairs with
+        it over Tor so you trade against a node you control instead of a stranger's.
+    </p>
+
+    <h2>Pair Bisq Connect</h2>
+    <p>
+        Open this service's <strong>Properties</strong> in StartOS. There you'll find the
+        <strong>Pairing Code</strong> with a scannable QR — scan it from Bisq Connect, or copy it into
+        <code>More → Trusted node setup → Pair with a new trusted node</code>. The code already encodes
+        the node's onion address, so nothing else is needed.
+    </p>
+
+    <div class="note">
+        <strong>Why the code isn't shown here:</strong> the pairing code grants trade control of your
+        node, so it's surfaced only in the authenticated StartOS Properties view — never on this page.
+        This page shows no secrets and can't act on your node.
+    </div>
+
+    <p>
+        Node status, health and backups are managed from the StartOS service dashboard.
+    </p>
+
+    <footer>
+        Bisq 2 Node · AGPL-3.0 · <a href="https://bisq.network">bisq.network</a>
+    </footer>
+</body>
+</html>
