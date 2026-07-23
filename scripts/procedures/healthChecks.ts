@@ -1,4 +1,4 @@
-import { types as T, util } from "../deps.ts";
+import { healthUtil, types as T, util } from "../deps.ts";
 
 // Healthy ("passing") once the node has published a pairing code — i.e. the container has written
 // start9/stats.yaml (see write-stats.sh). Until then, report "starting" (errorCode 60).
@@ -14,4 +14,8 @@ export const health: T.ExpectedExports.health = {
         util.errorCode(60, "Node is starting — waiting for the pairing code to be published"),
       );
   },
+  // The status page is the service's ONLY interface, so its liveness must be observable: the
+  // entrypoint fails startup if nginx can't bind, and this check catches nginx dying afterwards.
+  // Without it a dead interface stays invisible while pairing-ready reports the node healthy.
+  "status-page": healthUtil.checkWebUrl("http://bisq-node.embassy:8091"),
 };
