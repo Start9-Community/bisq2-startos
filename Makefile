@@ -42,14 +42,14 @@ x86:
 	ARCH=x86_64 $(MAKE)
 
 # The image is just our published node image + the StartOS entrypoint/scripts layer, built per-arch.
-docker-images/aarch64.tar: Dockerfile .dockerignore docker_entrypoint.sh write-stats.sh web/index.html web/default.conf
+docker-images/aarch64.tar: manifest.yaml Dockerfile .dockerignore docker_entrypoint.sh write-stats.sh web/index.html web/default.conf
 ifeq ($(ARCH),x86_64)
 else
 	mkdir -p docker-images
 	docker buildx build --tag start9/$(PKG_ID)/main:$(PKG_VERSION) --platform=linux/arm64 -o type=docker,dest=docker-images/aarch64.tar .
 endif
 
-docker-images/x86_64.tar: Dockerfile .dockerignore docker_entrypoint.sh write-stats.sh web/index.html web/default.conf
+docker-images/x86_64.tar: manifest.yaml Dockerfile .dockerignore docker_entrypoint.sh write-stats.sh web/index.html web/default.conf
 ifeq ($(ARCH),aarch64)
 else
 	mkdir -p docker-images

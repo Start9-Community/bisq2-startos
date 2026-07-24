@@ -46,9 +46,9 @@ health-checks:
     name: Pairing ready
     success-message: The node is up and a pairing code is available
     type: script
-  status-page:
-    name: Status page reachable
-    success-message: The status/landing page (the service's only interface) is serving
+  node-alive:
+    name: Node API responsive
+    success-message: The Bisq node API is up and responding (probed via the version endpoint)
     type: script
 config: ~
 # Properties surface the pairing code (with QR), read from stats.yaml the container writes.

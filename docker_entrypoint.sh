@@ -27,13 +27,13 @@ mkdir -p /data/start9
 rm -f /data/start9/stats.yaml /data/start9/.stats.yaml.*.tmp /data/pairing_qr_code.txt
 chown 999:999 /data/start9
 
-# Static status page on :8091 (the StartOS interface). Serves only web/index.html — no proxy, no
-# access to the pairing file — so it can neither leak the token nor misreport node health. Started
-# only AFTER the stale-state cleanup above, so it can't serve during the window where the existence-
-# only health check would accept a persisted stats.yaml. This is the service's ONLY interface, so a
-# failure to bind is FATAL: exit and let StartOS restart us rather than run a headless, unpairable
-# node (the `status-page` health check then catches nginx dying later — see healthChecks.ts).
-nginx || { printf " [!] status page (nginx) failed to start; aborting\n" >&2; exit 1; }
+# Static status page + node-liveness proxy on :8091 (the StartOS interface). Started only AFTER the
+# stale-state cleanup above, so it can't serve during the window where health would accept a
+# persisted stats.yaml. NON-FATAL by design: this page is decorative — pairing happens through
+# StartOS Properties and Bisq Connect reaches the node over its OWN onion, not this page — so a
+# web-server hiccup must NOT take down the trading node. If nginx dies the node keeps running and
+# the `node-alive` health check (which rides through nginx) turns not-green, surfacing it.
+nginx || printf " [!] status page (nginx) failed to start; node continues without it\n" >&2
 
 # Background: refresh /data/start9/stats.yaml from the pairing file every few seconds so the
 # StartOS UI shows the current (auto-rotating) pairing code + QR. Runs UNPRIVILEGED as the node's

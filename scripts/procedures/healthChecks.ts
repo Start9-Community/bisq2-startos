@@ -14,8 +14,23 @@ export const health: T.ExpectedExports.health = {
         util.errorCode(60, "Node is starting — waiting for the pairing code to be published"),
       );
   },
-  // The status page is the service's ONLY interface, so its liveness must be observable: the
-  // entrypoint fails startup if nginx can't bind, and this check catches nginx dying afterwards.
-  // Without it a dead interface stays invisible while pairing-ready reports the node healthy.
-  "status-page": healthUtil.checkWebUrl("http://bisq-node.embassy:8091"),
+  // Real liveness: probe the node's REST API (via nginx's exact /version proxy) instead of just
+  // checking a file exists — so a node that HANGS after publishing its pairing file no longer shows
+  // green. Unlike healthUtil.checkWebUrl (which ignores HTTP status), we inspect it: any response
+  // below 500 means the API answered and the node is up (a 401 from the auth filter still proves
+  // the server is alive); a 5xx — including nginx's 502 when the node is down — or a network error
+  // (nginx itself down) means not-ready. This probe also covers the nginx interface, since it rides
+  // through it, so it replaces the old existence-only status-page check.
+  async "node-alive"(effects, duration) {
+    const guard = healthUtil.guardDurationAboveMinimum({ duration, minimumTime: 5000 });
+    if (guard) return guard;
+    try {
+      const res = await effects.fetch("http://bisq-node.embassy:8091/api/v1/settings/version");
+      return res.status < 500
+        ? util.ok
+        : util.errorCode(60, `Node API not ready yet (HTTP ${res.status})`);
+    } catch (_e) {
+      return util.errorCode(60, "Node API not reachable yet");
+    }
+  },
 };
