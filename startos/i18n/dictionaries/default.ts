@@ -8,7 +8,7 @@ const dict = {
   'The node API is not ready': 3,
   'Pairing Code': 4,
   'A pairing code is available': 5,
-  'Waiting for the node to publish a pairing code': 6,
+  'No pairing code yet — the node may still be bootstrapping Tor': 6,
 
   // actions/showPairingCode.ts
   'Show Pairing Code': 7,

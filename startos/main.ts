@@ -73,11 +73,18 @@ export const main = sdk.setupMain(async ({ effects }) => {
                   message: i18n('A pairing code is available'),
                 }
               : {
-                  result: 'starting',
+                  result: 'failure',
                   message: i18n(
-                    'Waiting for the node to publish a pairing code',
+                    'No pairing code yet — the node may still be bootstrapping Tor',
                   ),
                 },
+          // Reported as "starting" for this long, then allowed to go red. The
+          // check only begins once the API is up, and the node published a code
+          // seconds later in testing, so ten minutes is well clear of a healthy
+          // start — long enough not to cry wolf, short enough that a Tor
+          // bootstrap wedged by a firewall or clock skew surfaces as a fault
+          // rather than an indefinite spinner.
+          gracePeriod: 600_000,
         },
         requires: ['primary'],
       })

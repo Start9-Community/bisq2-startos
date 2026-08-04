@@ -147,7 +147,10 @@ window bootstrapping Tor before the API binds at all.
 The Pairing Code check is the more meaningful of the two: the node publishes a
 code only once Tor has published its onion service _and_ the API is running, so
 it going green is what tells you the node is actually reachable by Bisq Connect,
-rather than merely alive.
+rather than merely alive. It carries a ten-minute grace period of its own,
+measured from when the API comes up, after which it goes red rather than sitting
+on a spinner indefinitely — a Tor bootstrap wedged by a firewall or by clock skew
+is a fault, and should read as one.
 
 ## Dependencies
 
