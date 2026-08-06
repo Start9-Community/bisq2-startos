@@ -1,7 +1,2 @@
-# Allowlist style: ignore everything, then re-include only what the image build needs
-# (the Dockerfile COPYs the entrypoint, write-stats, and the static status page under web/).
-*
-!Dockerfile
-!docker_entrypoint.sh
-!write-stats.sh
-!web/
+.git
+.gitmodules
