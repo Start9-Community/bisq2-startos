@@ -13,7 +13,7 @@ export const manifest = setupManifest({
   volumes: ['main'],
   images: {
     main: {
-      source: { dockerTag: 'ghcr.io/bisq-network/bisq2-api:2.1.11.1' },
+      source: { dockerTag: 'ghcr.io/bisq-network/bisq2-api:2.1.11.2' },
       arch: ['x86_64', 'aarch64'],
     },
   },
