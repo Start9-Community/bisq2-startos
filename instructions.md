@@ -28,7 +28,7 @@ Once paired, everything you actually do — browsing offers, trading, chat — h
 
 Displays the code that pairs a device with this node, as text and as a scannable QR.
 
-A code is good for one pairing and then expires, and the node replaces it every few minutes on its own. So the code you see is always the current one, and if a pairing attempt fails, run the action again and use the fresh code.
+A code is good for one pairing and then expires. The action always shows the code that is currently valid, so if a pairing attempt fails, run it again and use whatever code it gives you. Restarting the service also mints a new one.
 
 Treat the code like a key: anyone who has it can trade on your node. Only scan it into a device you own.
 
