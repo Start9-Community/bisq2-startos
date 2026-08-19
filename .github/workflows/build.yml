@@ -3,6 +3,10 @@ name: Build
 on:
   workflow_dispatch:
   pull_request:
+    # ready_for_review is not among GitHub's default activity types, so without
+    # it a PR opened as a draft (skipped by the job condition below) never gets
+    # CI when marked ready — only on its next push.
+    types: [opened, synchronize, reopened, ready_for_review]
     paths-ignore: ['*.md']
     branches: ['main']
 
@@ -13,7 +17,7 @@ concurrency:
 jobs:
   build:
     if: github.event.pull_request.draft == false
-    uses: Start9Labs/start-technologies/.github/workflows/build.yml@master
+    uses: Start9Labs/start-technologies/.github/workflows/build.yml@a394218469ed530e2e9f17f90c5e8a48a76ca80f # master @ 2026-08-18
     # with:
     #   FREE_DISK_SPACE: true
     # No DEV_KEY — a PR build doesn't publish, so it doesn't need the signing key.
