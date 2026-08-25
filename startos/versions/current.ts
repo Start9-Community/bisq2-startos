@@ -1,18 +1,18 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '2.1.11.2:0',
+  version: '2.1.12.0:0',
   releaseNotes: {
     en_US:
-      'Updates the node to Bisq 2 API 2.1.11.2. Adds WebSocket compression for faster, lighter phone syncing over Tor, network health metrics the Bisq Connect app can display, and support for the Telebirr payment method for the Ethiopian market.',
+      'Security release: updates the node to Bisq 2 API 2.1.12.0. A Bisq security alert requires version 2.1.12 or newer for trading — older nodes are blocked from taking or processing offers. Also required by Bisq Connect 0.8.2+, which only pairs with nodes running 2.1.12 or newer.',
     es_ES:
-      'Actualiza el nodo a la API 2.1.11.2 de Bisq 2. Añade compresión WebSocket para una sincronización del teléfono más rápida y ligera a través de Tor, métricas del estado de la red que la app Bisq Connect puede mostrar, y soporte para el método de pago Telebirr para el mercado etíope.',
+      'Versión de seguridad: actualiza el nodo a la API 2.1.12.0 de Bisq 2. Una alerta de seguridad de Bisq exige la versión 2.1.12 o superior para operar — los nodos con versiones anteriores quedan bloqueados para tomar o procesar ofertas. También la requiere Bisq Connect 0.8.2+, que solo se empareja con nodos con la versión 2.1.12 o superior.',
     de_DE:
-      'Aktualisiert den Knoten auf die Bisq-2-API 2.1.11.2. Fügt WebSocket-Kompression für schnellere, leichtere Telefon-Synchronisation über Tor hinzu, außerdem Netzwerkmetriken, die die Bisq-Connect-App anzeigen kann, sowie Unterstützung für die Zahlungsmethode Telebirr für den äthiopischen Markt.',
+      'Sicherheitsrelease: aktualisiert den Knoten auf die Bisq-2-API 2.1.12.0. Eine Bisq-Sicherheitswarnung verlangt für den Handel Version 2.1.12 oder neuer — ältere Knoten können keine Angebote mehr annehmen oder verarbeiten. Außerdem erforderlich für Bisq Connect 0.8.2+, das sich nur mit Knoten ab Version 2.1.12 koppelt.',
     pl_PL:
-      'Aktualizuje węzeł do API Bisq 2 w wersji 2.1.11.2. Dodaje kompresję WebSocket dla szybszej i lżejszej synchronizacji telefonu przez Tor, metryki stanu sieci, które może wyświetlać aplikacja Bisq Connect, oraz obsługę metody płatności Telebirr dla rynku etiopskiego.',
+      'Wydanie bezpieczeństwa: aktualizuje węzeł do API Bisq 2 w wersji 2.1.12.0. Alert bezpieczeństwa Bisq wymaga do handlu wersji 2.1.12 lub nowszej — starsze węzły nie mogą przyjmować ani przetwarzać ofert. Wymagane także przez Bisq Connect 0.8.2+, który paruje się tylko z węzłami w wersji 2.1.12 lub nowszej.',
     fr_FR:
-      "Met à jour le nœud vers l'API Bisq 2 2.1.11.2. Ajoute la compression WebSocket pour une synchronisation du téléphone plus rapide et plus légère via Tor, des métriques réseau que l'app Bisq Connect peut afficher, et la prise en charge du moyen de paiement Telebirr pour le marché éthiopien.",
+      "Version de sécurité : met à jour le nœud vers l'API Bisq 2 2.1.12.0. Une alerte de sécurité Bisq exige la version 2.1.12 ou ultérieure pour trader — les nœuds plus anciens ne peuvent plus prendre ni traiter d'offres. Également requise par Bisq Connect 0.8.2+, qui ne s'appaire qu'avec des nœuds en version 2.1.12 ou ultérieure.",
   },
   migrations: {
     up: async ({ effects }) => {},
