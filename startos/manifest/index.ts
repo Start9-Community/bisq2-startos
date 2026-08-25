@@ -20,7 +20,7 @@ export const manifest = setupManifest({
       //   https://ghcr.io/v2/bisq-network/bisq2-api/manifests/<tag> | grep -i docker-content-digest
       source: {
         dockerTag:
-          'ghcr.io/bisq-network/bisq2-api:2.1.11.2@sha256:3dd9152da26fa6d409707e16b4e0a5725ed95e59383de02a1f5778ec75d69306',
+          'ghcr.io/bisq-network/bisq2-api:2.1.12.0@sha256:beba2f2db5aefca0f4b8d49285b105cb0b29d0eb0ed0f8136712aace0e167906',
       },
       arch: ['x86_64', 'aarch64'],
     },
