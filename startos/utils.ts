@@ -19,8 +19,34 @@ export const pairingCodeFile = 'pairing_qr_code.txt'
  */
 const maxPairingFileBytes = 64 * 1024
 
-/** base64url alphabet (plus padding), which is what the node emits. */
-const pairingCodePattern = /^[A-Za-z0-9_=-]+$/
+/** Unpadded base64url alphabet, which is what the node's generator emits. */
+const pairingCodePattern = /^[A-Za-z0-9_-]+$/
+
+/**
+ * The decoded envelope starts with a version byte, then length-prefixed
+ * pairing-code and WebSocket-URL fields — real codes decode to far more than
+ * this floor.
+ */
+const minPairingCodeBytes = 16
+
+/**
+ * Version byte of the pairing QR envelope emitted by the bundled node
+ * (`PairingQrCodeFormat.VERSION` in bisq2). The image is digest-pinned, so the
+ * version can only change with a package update — bump this in lockstep.
+ */
+const pairingQrCodeVersion = 1
+
+/**
+ * Decode canonical unpadded base64url, or `null` if `value` is not the
+ * canonical encoding of any byte string. `Buffer.from` alone is too lenient —
+ * it silently drops padding, invalid characters, and non-zero trailing bits —
+ * so require the decode to round-trip back to the input.
+ */
+function decodeCanonicalBase64Url(value: string): Buffer | null {
+  if (!pairingCodePattern.test(value)) return null
+  const decoded = Buffer.from(value, 'base64url')
+  return decoded.toString('base64url') === value ? decoded : null
+}
 
 /**
  * Read the current pairing code, or `null` if the node has not published one.
@@ -68,7 +94,17 @@ export async function readPairingCode(): Promise<string | null> {
 
     const pairingCode = contents.split(/\n\s*\n/)[0].replace(/\s/g, '')
     if (!pairingCode) return null
-    if (pairingCode.length > 4096 || !pairingCodePattern.test(pairingCode)) {
+    // The `pairing-published` health check and the show-pairing-code action
+    // both report whatever this returns as ready to scan, so only accept a
+    // string Bisq Connect can actually decode: canonical unpadded base64url
+    // whose payload is a plausibly-sized envelope of the expected version.
+    const decoded =
+      pairingCode.length <= 4096 ? decodeCanonicalBase64Url(pairingCode) : null
+    if (
+      decoded === null ||
+      decoded.length < minPairingCodeBytes ||
+      decoded[0] !== pairingQrCodeVersion
+    ) {
       throw new Error('pairing code file does not contain a valid pairing code')
     }
     return pairingCode
