@@ -1,0 +1,19 @@
+name: Sync next
+
+# Carries every change that lands on the base branch onto the paired `next`
+# iteration branch, so `next` never drifts behind what has already shipped.
+# `next` is created on the first run if the repo does not have one yet.
+on:
+  push:
+    branches: ['main']
+  workflow_dispatch:
+
+jobs:
+  sync:
+    # Pinned to a reviewed commit: this call runs with contents/pull-requests
+    # write on our token, so it must not float on upstream master. At this SHA
+    # the workflow's whole call graph is immutable (only actions/checkout@v6).
+    uses: Start9Labs/start-technologies/.github/workflows/syncNext.yml@a394218469ed530e2e9f17f90c5e8a48a76ca80f # master @ 2026-08-18
+    permissions:
+      contents: write
+      pull-requests: write
