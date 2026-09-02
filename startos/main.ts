@@ -21,16 +21,8 @@ export const main = sdk.setupMain(async ({ effects }) => {
     sdk.Daemons.of(effects)
       .addDaemon('primary', {
         subcontainer,
-        // A pairing code is single-use and expires, and the node only republishes
-        // one once Tor and the API are up. Dropping the previous run's file keeps
-        // `pairing-published` from going green — and the action from handing out
-        // a dead code — before the running node has minted a fresh one. It is
-        // part of THIS exec (not a oneshot) because the SDK restarts a crashed
-        // daemon inside its own loop without re-running the chain's oneshots, and
-        // the cleanup must also cover that path. The entrypoint is spelled out
-        // because `useEntrypoint()` is a runtime sentinel that cannot be wrapped;
-        // it is our own first-party image (see manifest), so the path is stable —
-        // re-verify it when bumping the image tag.
+        // A pairing code is single-use, so the previous run's file goes at every
+        // launch — crash-restarts included — before it can be handed out as current.
         exec: {
           command: [
             '/bin/sh',

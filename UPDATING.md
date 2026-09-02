@@ -2,8 +2,8 @@
 
 This package wraps the node image the Bisq project publishes,
 `ghcr.io/bisq-network/bisq2-api`, unmodified. There is no `Dockerfile` here and
-nothing is built from source, so a version bump is a one-line change to the
-image tag.
+nothing is built from source, so a version bump is a change to the image
+reference plus the four checks below.
 
 The image tag is **not** the Bisq 2 release tag. It carries a fourth segment for
 the image build — Bisq 2 `v2.1.11` is published as `bisq2-api:2.1.11.1` — and a
@@ -13,7 +13,7 @@ published rather than deriving it from the Bisq 2 release.
 ## Determining the upstream version
 
 The current pin lives in `startos/manifest/index.ts` at
-`images.main.source.dockerTag`.
+`images.main.source.dockerTag`, as `<tag>@<index digest>`.
 
 Fetch the tags published for the image:
 
@@ -37,7 +37,19 @@ release, see <https://github.com/bisq-network/bisq2/releases>.
 
 ## Applying the bump
 
-1. Set `dockerTag` in `startos/manifest/index.ts` to the new `ghcr.io/bisq-network/bisq2-api:<tag>`.
+1. Resolve the tag's multi-arch index digest and set `dockerTag` in
+   `startos/manifest/index.ts` to `ghcr.io/bisq-network/bisq2-api:<tag>@<digest>`:
+
+   ```sh
+   TOKEN=$(curl -s "https://ghcr.io/token?scope=repository:bisq-network/bisq2-api:pull" | jq -r .token)
+   curl -sI -H "Authorization: Bearer $TOKEN" \
+     -H "Accept: application/vnd.oci.image.index.v1+json" \
+     https://ghcr.io/v2/bisq-network/bisq2-api/manifests/<tag> \
+     | grep -i docker-content-digest
+   ```
+
+   Pack with Docker: podman rejects a `tag@digest` reference.
+
 2. Set `version` in `startos/versions/current.ts` to `<tag>:0` — the image tag,
    then the packaging revision. Bump only the `:N` suffix for changes to this
    package that do not move the image.
@@ -53,3 +65,19 @@ release, see <https://github.com/bisq-network/bisq2/releases>.
 
    `README.md` documents the behavior this package relies on; update it if any of
    it has moved.
+
+5. Confirm the image's entrypoint path is still `/usr/local/bin/entrypoint.sh`,
+   which `startos/main.ts` spells out in the daemon command so it can clear the
+   previous run's pairing code first:
+
+   ```sh
+   docker inspect --format '{{json .Config.Entrypoint}}' \
+     ghcr.io/bisq-network/bisq2-api:<tag>
+   ```
+
+6. Confirm the pairing QR envelope's version byte still matches
+   `pairingQrCodeVersion` in `startos/utils.ts` — `PairingQrCodeFormat.VERSION`
+   in bisq2. A mismatch makes `readPairingCode` reject every code the node
+   publishes, which surfaces as a permanently failing Pairing Code health check.
+   The cheapest check is to install the bumped package and watch that check go
+   green.

@@ -13,34 +13,23 @@ export const apiPort = 8090
 /** Where the node writes the current pairing code, relative to the data volume. */
 export const pairingCodeFile = 'pairing_qr_code.txt'
 
-/**
- * The pairing string plus its ASCII-art QR rendering fit in a few KiB; anything
- * beyond this is not a pairing file.
- */
+/** The pairing string plus its ASCII-art QR rendering fit in a few KiB. */
 const maxPairingFileBytes = 64 * 1024
+const maxPairingCodeChars = 4096
 
 /** Unpadded base64url alphabet, which is what the node's generator emits. */
 const pairingCodePattern = /^[A-Za-z0-9_-]+$/
 
-/**
- * The decoded envelope starts with a version byte, then length-prefixed
- * pairing-code and WebSocket-URL fields — real codes decode to far more than
- * this floor.
- */
+/** Floor on the decoded envelope: a version byte plus length-prefixed fields. */
 const minPairingCodeBytes = 16
 
-/**
- * Version byte of the pairing QR envelope emitted by the bundled node
- * (`PairingQrCodeFormat.VERSION` in bisq2). The image is digest-pinned, so the
- * version can only change with a package update — bump this in lockstep.
- */
+/** `PairingQrCodeFormat.VERSION` in bisq2 — re-verify on an image bump. */
 const pairingQrCodeVersion = 1
 
 /**
- * Decode canonical unpadded base64url, or `null` if `value` is not the
- * canonical encoding of any byte string. `Buffer.from` alone is too lenient —
- * it silently drops padding, invalid characters, and non-zero trailing bits —
- * so require the decode to round-trip back to the input.
+ * Decode canonical unpadded base64url, or `null` if `value` is not the canonical
+ * encoding of any byte string. `Buffer.from` tolerates padding, stray characters
+ * and non-zero trailing bits, so require the decode to round-trip.
  */
 function decodeCanonicalBase64Url(value: string): Buffer | null {
   if (!pairingCodePattern.test(value)) return null
@@ -55,14 +44,11 @@ function decodeCanonicalBase64Url(value: string): Buffer | null {
  * code rendered as ASCII-art QR — so the code is the first blank-line-delimited
  * chunk, with whitespace stripped.
  *
- * This runs in the CONTROLLER while the file lives on a volume the node can
- * write, so a compromised node must not be able to hang or exhaust this
- * process. The read is therefore deliberately paranoid rather than
- * `readFile`: `O_NOFOLLOW` rejects a symlink (e.g. to `/dev/zero`),
- * `O_NONBLOCK` keeps a FIFO from blocking the open, `fstat` on the opened
- * handle (race-free, unlike a separate lstat) rejects any non-regular file,
- * and the read is bounded before allocation. Structurally invalid content
- * throws — tampering must surface as a fault, not as "still bootstrapping".
+ * The node writes this file and the controller reads it, so the open is
+ * `O_NOFOLLOW | O_NONBLOCK` with an `fstat` regular-file check and a bounded
+ * read: a symlink, a FIFO or an unbounded file must not hang or exhaust the
+ * controller. Structurally invalid content throws, because the health check and
+ * the action both present whatever this returns as ready to scan.
  */
 export async function readPairingCode(): Promise<string | null> {
   const path = sdk.volumes.main.subpath(pairingCodeFile)
@@ -73,11 +59,9 @@ export async function readPairingCode(): Promise<string | null> {
       constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK,
     )
   } catch (e) {
-    const code = (e as NodeJS.ErrnoException)?.code
-    // Absent until the node publishes one. Anything else — a symlink (ELOOP),
-    // a permission or I/O fault — is a real problem, and must not be reported
-    // to the user as the node merely still starting up.
-    if (code === 'ENOENT') return null
+    // Absent until the node publishes one; anything else is a real fault and
+    // must not read to the user as the node merely still starting up.
+    if ((e as NodeJS.ErrnoException)?.code === 'ENOENT') return null
     throw e
   }
   try {
@@ -88,18 +72,16 @@ export async function readPairingCode(): Promise<string | null> {
     if (stat.size > maxPairingFileBytes) {
       throw new Error('pairing code file is implausibly large')
     }
-    const buffer = Buffer.alloc(Number(stat.size))
+    const buffer = Buffer.alloc(stat.size)
     const { bytesRead } = await handle.read(buffer, 0, buffer.length, 0)
     const contents = buffer.subarray(0, bytesRead).toString('utf-8')
 
     const pairingCode = contents.split(/\n\s*\n/)[0].replace(/\s/g, '')
     if (!pairingCode) return null
-    // The `pairing-published` health check and the show-pairing-code action
-    // both report whatever this returns as ready to scan, so only accept a
-    // string Bisq Connect can actually decode: canonical unpadded base64url
-    // whose payload is a plausibly-sized envelope of the expected version.
     const decoded =
-      pairingCode.length <= 4096 ? decodeCanonicalBase64Url(pairingCode) : null
+      pairingCode.length <= maxPairingCodeChars
+        ? decodeCanonicalBase64Url(pairingCode)
+        : null
     if (
       decoded === null ||
       decoded.length < minPairingCodeBytes ||

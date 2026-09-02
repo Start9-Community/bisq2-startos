@@ -13,11 +13,8 @@ export const manifest = setupManifest({
   volumes: ['main'],
   images: {
     main: {
-      // Tag pinned to its immutable multi-arch index digest so a registry-side
-      // re-tag can never change the bytes inside a signed package. On upgrade,
-      // refresh with: TOKEN=$(curl -s "https://ghcr.io/token?scope=repository:bisq-network/bisq2-api:pull" | jq -r .token);
-      // curl -sI -H "Authorization: Bearer $TOKEN" -H "Accept: application/vnd.oci.image.index.v1+json" \
-      //   https://ghcr.io/v2/bisq-network/bisq2-api/manifests/<tag> | grep -i docker-content-digest
+      // Pinned to the tag's multi-arch index digest so a registry-side re-tag
+      // cannot change what a build pulls. UPDATING.md has the refresh command.
       source: {
         dockerTag:
           'ghcr.io/bisq-network/bisq2-api:2.1.12.0@sha256:beba2f2db5aefca0f4b8d49285b105cb0b29d0eb0ed0f8136712aace0e167906',
