@@ -39,15 +39,19 @@ This packages the **node** only, not the Bisq 2 desktop application.
 
 One image, published by the Bisq project and consumed unmodified — this package builds nothing and ships no `Dockerfile`.
 
-| Property      | Value                                      |
-| ------------- | ------------------------------------------ |
-| Image         | `ghcr.io/bisq-network/bisq2-api`           |
-| Architectures | x86_64, aarch64                            |
-| Entrypoint    | The image's own, via `sdk.useEntrypoint()` |
+| Property      | Value                                                      |
+| ------------- | ---------------------------------------------------------- |
+| Image         | `ghcr.io/bisq-network/bisq2-api`                           |
+| Architectures | x86_64, aarch64                                            |
+| Entrypoint    | The image's own, preceded by the stale-pairing-code delete |
 
-| Subcontainer     | Purpose                                                  |
-| ---------------- | -------------------------------------------------------- |
-| `bisq2-node-sub` | The oneshot and the node daemon — the one to `attach` to |
+The image reference is pinned to the multi-arch index digest as well as the tag,
+so a registry-side re-tag cannot change what a build pulls. `UPDATING.md` carries
+the command that resolves a new digest.
+
+| Subcontainer     | Purpose                                  |
+| ---------------- | ---------------------------------------- |
+| `bisq2-node-sub` | The node daemon — the one to `attach` to |
 
 The image's entrypoint runs as root, takes ownership of the data directory, and drops to the unprivileged `bisq` user before starting the node, so the node process itself never runs as root. It also points the node at the mounted data directory and sets the pairing-code lifetime; this package overrides neither.
 
@@ -76,7 +80,9 @@ None. There is no configuration file this package owns, seeds, or rewrites.
 
 One file on the volume is read but not modelled: `pairing_qr_code.txt`, which the node writes and the package reads directly on each use. It is deliberately not a file model, because it is **state rather than configuration** — single-use, expiring, and rewritten by the node — so caching or merging it would hand out a code that is no longer valid. The read parses the first blank-line-delimited chunk, since the node writes the code, a blank line, and then the same code as ASCII-art QR.
 
-The package does delete that file once, at start-up, before the node comes up. That is not configuration either; it is what stops a stale code from a previous run being presented as current.
+**The read validates before it returns.** A code is accepted only if it is canonical unpadded base64url decoding to an envelope of the expected version and a plausible length; anything else raises a fault rather than being presented as a code to scan. The file lives on a volume the node writes, so the read also refuses a symlink or a non-regular file and is bounded in size.
+
+The package deletes that file at every daemon launch, crash-restarts included, before the node comes up. That is not configuration either; it is what stops a stale code from a previous run being presented as current.
 
 ## Dependencies
 
@@ -110,7 +116,7 @@ One action.
 
 Displays the code that pairs a device with this node, as masked copyable text and as a scannable QR. Run it once the Pairing Code check is green, and again after any failed pairing attempt.
 
-- **When to run it:** only while the service is running — it reads a file the running node maintains, and fails with an explanatory error if no code has been published yet.
+- **When to run it:** only while the service is running — it reads a file the running node maintains, and fails with an explanatory error if no code has been published yet or if the file does not hold a decodable code.
 - **What it changes:** nothing. It is a read.
 - **Cost:** immediate.
 - **Repeat safety:** read-only, but the value is **single-use**: a code that has been consumed by a pairing is spent, and the node publishes a replacement. Re-running the action is the correct recovery from a failed pairing, because it returns whatever code is current rather than a cached one.
@@ -137,13 +143,15 @@ Two checks, and the second is the one that matters.
 | Check               | Displayed as   | Method                                | Grace Period |
 | ------------------- | -------------- | ------------------------------------- | ------------ |
 | `primary`           | "Node API"     | HTTP request to the loopback API port | 300s         |
-| `pairing-published` | "Pairing Code" | A pairing code exists on disk         | 600s         |
+| `pairing-published` | "Pairing Code" | A valid pairing code exists on disk   | 600s         |
 
 **"Node API" means alive; "Pairing Code" means reachable.** The node publishes a code only after Tor has published its onion service _and_ the API is running, so the second check going green is what tells you Bisq Connect can actually reach this node. A green API check on its own does not.
 
 The grace periods encode the cold-start shape: five minutes for the API, because most of that window is Tor bootstrapping before the port is bound at all; then ten minutes for the pairing code, measured from when the API comes up. Both display failures as "starting" inside the grace period. The second one is deliberately allowed to go **red** afterwards rather than spinning forever — a Tor bootstrap wedged by a firewall or by clock skew is a fault and should read as one.
 
 The API check is a plain HTTP request rather than a port probe. That is not a stylistic choice: the API binds an IPv4-mapped IPv6 socket, which the SDK's port-listening helper does not match, and it would report failure indefinitely.
+
+A pairing file that exists but does not hold a decodable code carries the parse error as the check's message, so an unreadable file is distinguishable from one that has not been written yet. It still displays as "starting" until the grace period expires.
 
 ## Backups and Restore
 

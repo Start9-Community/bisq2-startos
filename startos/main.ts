@@ -19,18 +19,17 @@ export const main = sdk.setupMain(async ({ effects }) => {
 
   return (
     sdk.Daemons.of(effects)
-      // A pairing code is single-use and expires, and the node only republishes
-      // one once Tor and the API are up. Dropping the file from the previous run
-      // keeps `pairing-published` from going green — and the action from handing
-      // out a code — before the running node has minted a fresh one.
-      .addOneshot('clear-stale-pairing-code', {
-        subcontainer,
-        exec: { command: ['rm', '-f', `/data/${pairingCodeFile}`] },
-        requires: [],
-      })
       .addDaemon('primary', {
         subcontainer,
-        exec: { command: sdk.useEntrypoint() },
+        // A pairing code is single-use, so the previous run's file goes at every
+        // launch — crash-restarts included — before it can be handed out as current.
+        exec: {
+          command: [
+            '/bin/sh',
+            '-c',
+            `rm -f /data/${pairingCodeFile} && exec /usr/local/bin/entrypoint.sh`,
+          ],
+        },
         ready: {
           display: i18n('Node API'),
           // Neither SDK helper fits. `checkPortListening` misses the port
@@ -58,7 +57,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
           // display as "starting".
           gracePeriod: 300_000,
         },
-        requires: ['clear-stale-pairing-code'],
+        requires: [],
       })
       // The node publishes a pairing code only after Tor has published its onion
       // service and the API is running, so this is the signal that the node is
