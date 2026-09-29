@@ -17,7 +17,7 @@ export const manifest = setupManifest({
       // cannot change what a build pulls. UPDATING.md has the refresh command.
       source: {
         dockerTag:
-          'ghcr.io/bisq-network/bisq2-api:2.1.12.0@sha256:beba2f2db5aefca0f4b8d49285b105cb0b29d0eb0ed0f8136712aace0e167906',
+          'ghcr.io/bisq-network/bisq2-api:2.1.13.0@sha256:caeebd10b6e232ea8567941e4c6594b4000b5771c9e53cef25cf9b9766d5570d',
       },
       arch: ['x86_64', 'aarch64'],
     },
