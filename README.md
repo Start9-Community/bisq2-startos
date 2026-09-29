@@ -100,6 +100,8 @@ The node's API is bound to loopback inside the container. Bisq Connect does not 
 
 Exporting a binding would publish a second live, authenticated path to that API that nothing uses, and put an address on the service page that looks like the pairing address and is not. Two upstream facts make it useless rather than merely unnecessary: the node's config has no advertised-address option, so the pairing code can only ever name an address the node itself binds; and Bisq Connect's trusted-node setup accepts only a pasted code or a scanned QR, with no field to type an address into.
 
+**The node's Tor is its own**, so its messages are in this service's log, not the Tor service's. The log shows `Pairing code … consumed` for each completed pairing and `Client connected` for each app session, but not plain HTTP requests.
+
 ## Installation and First-Run Flow
 
 There is no wizard, no configuration, and no credential to choose. Install raises a single `important` task pointing at [Show Pairing Code](#actions), and that is the whole of setup.
@@ -114,12 +116,12 @@ One action.
 
 ### Show Pairing Code
 
-Displays the code that pairs a device with this node, as masked copyable text and as a scannable QR. Run it once the Pairing Code check is green, and again after any failed pairing attempt.
+Displays the code that pairs a device with this node, as masked copyable text and as a scannable QR. Run it once the Pairing Code check is green, and again whenever a device needs a new code.
 
 - **When to run it:** only while the service is running — it reads a file the running node maintains, and fails with an explanatory error if no code has been published yet or if the file does not hold a decodable code.
 - **What it changes:** nothing. It is a read.
 - **Cost:** immediate.
-- **Repeat safety:** read-only, but the value is **single-use**: a code that has been consumed by a pairing is spent, and the node publishes a replacement. Re-running the action is the correct recovery from a failed pairing, because it returns whatever code is current rather than a cached one.
+- **Repeat safety:** read-only, but the value is **single-use**: a code that has been consumed by a pairing is spent, and the node publishes a replacement. A pairing that times out in Bisq Connect usually never reached the node, so the code is still good and the fix is a retry in the app.
 - **Outputs:** the pairing code. It carries this node's address, so nothing else needs entering on the device.
 
 **The code is a credential.** Anyone holding it can trade on this node, which is why it is masked and reachable only through an authenticated action. Its lifetime is the image entrypoint's default; this package does not set it.

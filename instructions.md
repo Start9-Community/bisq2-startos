@@ -16,9 +16,9 @@ The node joins the Bisq P2P network over its own bundled Tor, and your phone rea
 1. Start the service. The first start takes a few minutes: the node has to bootstrap Tor and publish an onion address before it can accept a pairing.
 2. Watch the **Pairing Code** health check. It turns green once the node has published a code and is ready to pair.
 3. Run the **Show Pairing Code** action.
-4. In Bisq Connect, scan the QR code — or copy the code and paste it into **More → Trusted node setup → Pair with a new trusted node**.
+4. In Bisq Connect, scan the QR code. If the app is already set up, start from **More → Trusted node setup → Pair with a new trusted node**, where you can also paste the code.
 
-The code already carries this node's address, so there is nothing else to enter.
+The code already carries this node's address, so there is nothing else to enter. If Bisq Connect times out, tap retry: the first connection over Tor can be slow, and the code is still good.
 
 ## Using Bisq 2 Node
 
@@ -28,7 +28,7 @@ Once paired, everything you actually do — browsing offers, trading, chat — h
 
 Displays the code that pairs a device with this node, as text and as a scannable QR.
 
-A code is good for one pairing and then expires. The action always shows the code that is currently valid, so if a pairing attempt fails, run it again and use whatever code it gives you. Restarting the service also mints a new one.
+A code is good for one pairing and then expires. The action always shows the code that is currently valid; run it again whenever you need a new one.
 
 Treat the code like a key: anyone who has it can trade on your node. Only scan it into a device you own.
 
