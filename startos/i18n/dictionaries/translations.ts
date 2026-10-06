@@ -15,6 +15,7 @@ export default {
     10: 'Escanéalo desde Bisq Connect o pégalo en “Vincular con un nuevo nodo de confianza”. Ya contiene la dirección de este nodo, así que no hace falta nada más.',
     11: 'Es de un solo uso y caduca: vuelve a ejecutar esta acción para obtener uno nuevo.',
     12: 'Vincula Bisq Connect con este nodo cuando haya terminado de arrancar.',
+    13: 'Todavía no se ha publicado ningún código de vinculación. El nodo publica uno cuando ha arrancado Tor e iniciado su API: consulte la comprobación de estado Código de vinculación.',
   },
   de_DE: {
     0: 'Starte Bisq 2 Node!',
@@ -30,6 +31,7 @@ export default {
     10: 'Scanne ihn mit Bisq Connect oder füge ihn unter „Mit einem neuen vertrauenswürdigen Knoten koppeln“ ein. Er enthält bereits die Adresse dieses Knotens, mehr ist nicht nötig.',
     11: 'Einmalig gültig und läuft ab – führe diese Aktion erneut aus, um einen neuen Code zu erhalten.',
     12: 'Koppele Bisq Connect mit diesem Knoten, sobald er vollständig gestartet ist.',
+    13: 'Es wurde noch kein Kopplungscode veröffentlicht. Der Knoten veröffentlicht einen, sobald er Tor gestartet und seine API hochgefahren hat – beobachten Sie die Statusprüfung „Kopplungscode“.',
   },
   pl_PL: {
     0: 'Uruchamianie Bisq 2 Node!',
@@ -45,6 +47,7 @@ export default {
     10: 'Zeskanuj go w Bisq Connect lub wklej w „Sparuj z nowym zaufanym węzłem”. Zawiera już adres tego węzła, więc nic więcej nie jest potrzebne.',
     11: 'Jednorazowy i wygasa — uruchom tę akcję ponownie, aby uzyskać nowy kod.',
     12: 'Sparuj Bisq Connect z tym węzłem, gdy zakończy uruchamianie.',
+    13: 'Kod parowania nie został jeszcze opublikowany. Węzeł publikuje go, gdy uruchomi Tor i swoje API — obserwuj kontrolę stanu Kod parowania.',
   },
   fr_FR: {
     0: 'Démarrage de Bisq 2 Node !',
@@ -60,5 +63,6 @@ export default {
     10: 'Scannez-le depuis Bisq Connect ou collez-le dans « Appairer un nouveau nœud de confiance ». Il contient déjà l’adresse de ce nœud, rien d’autre n’est nécessaire.',
     11: 'À usage unique et il expire : relancez cette action pour obtenir un nouveau code.',
     12: 'Appairez Bisq Connect avec ce nœud une fois son démarrage terminé.',
+    13: "Aucun code d'appairage n'est encore publié. Le nœud en publie un une fois Tor démarré et son API lancée : surveillez la vérification d'état Code d'appairage.",
   },
 } satisfies Record<string, LangDict>

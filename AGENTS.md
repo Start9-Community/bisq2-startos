@@ -18,21 +18,23 @@ Freshly scaffolded? Work the
 guide page, not a file in this repo — read it, don't copy it in.
 
 Keep `README.md` (technical reference for an AI support or administering agent) and
-`instructions.md` (end-user docs) in sync with your changes.
+`instructions.md` (end-user docs) in sync with your changes. This file restates neither:
+whoever changes the package has both, so it carries only what they don't — repo mechanics,
+a change that looks right and is not, where the next thing gets added, a naming trap, a
+build or test invocation particular to this repo.
 
-**Bugs and feature requests are GitHub issues on this repo** — file them as you find them.
+**Fix a defect you spot rather than reporting it** — you have the package open and the
+context to be sure. File **a GitHub issue on this repo** only when the call isn't yours to
+make: you can't pin the cause down, two defensible fixes exist, or it's too large to ride on
+the work in hand. An open issue is a report, not a queue — implement one when you're asked
+to or when it's labelled `Approved`, then close it with `Closes #<n>`.
+
 Don't record work in the repo instead: no `TODO.md`, no `NOTES.md`, no `PLAN.md`. What you
 verified, tried, and decided belongs in the commit message and the PR body.
 
 ## This repo
 
-- **The package id is `bisq2-node`, in a repo named `bisq2-startos`.** `Start9-Community/bisq2-startos` is Start9's fork of the Bisq project's repo, and the community registry builds from the fork.
-- **Don't add a `Dockerfile` to get a helper script in.** The upstream image is consumed unmodified; put the logic in `startos/` instead. When you need to know what the image actually does, read its `entrypoint.sh` and bundled `api_app.conf` rather than assuming — `UPDATING.md` has the commands.
-- **`startos/interfaces.ts` returning `[]` is finished, not unfinished.** The node cannot advertise an address it does not bind — `ApiConfig` exposes only `bindHost` / `bindPort` / `onionServicePort` — and Bisq Connect derives the endpoint from inside the pairing code (`apiUrl = code.restApiUrl`), with no host field to override it. An interface would publish a second, live, authenticated path to the API that the app never dials. Don't work around it by re-encoding the pairing blob: that reimplements `PairingQrCodeFormat` out of tree and breaks silently the first time its version, flags, or TLS-fingerprint fields change.
-- **Keep the stale-pairing-code delete inside the daemon's `exec`, not in a oneshot.** The SDK's restart loop re-runs only the daemon command, so a oneshot would be skipped on a crash-restart and leave the previous run's spent code on disk for the health check and the action to present as current. That is also why the entrypoint path is spelled out rather than `sdk.useEntrypoint()`, which is a sentinel the SDK resolves and cannot be wrapped — `UPDATING.md` carries the re-verification step for an image bump.
-
-### `start-cli package attach` exits 0 even when the command fails
-
-This is a StartOS bug rather than a quirk of this package, and it belongs in the packaging guide; it is recorded here because that is currently the only place it is written down. `attach … -- sh -c 'exit 7'` exits 0, and so does `-- false`. **Test conditions by matching on output, never on `$?`.**
-
-The attach protocol does carry the exit code, but the server sends `ExitStatus::into_raw()` — the raw `wait` status, which encodes the code as `code << 8` — and the client hands that to `std::process::exit`, where the kernel keeps only the low byte. `strace` confirms it: an inner `exit 7` reaches `exit_group(1792)`. Since `code << 8` always has a zero low byte, every exit code collapses to 0. A non-zero status from `attach` means `attach` itself failed (6, for instance, when no subcontainer is running).
+- **The package id is `bisq2-node`, in a repo named `bisq2-startos`.**
+- **Don't add a `Dockerfile` to get a helper script in.** The upstream image is consumed unmodified, so the logic goes in `startos/`; read the image's `entrypoint.sh` and `api_app.conf` (`UPDATING.md` has the commands) rather than assuming what it does.
+- **Don't add an interface to `startos/interfaces.ts`, and don't re-encode the pairing blob to get one.** Bisq Connect takes its endpoint from inside the pairing code, so an interface is a second live path to the API that nothing dials, and re-encoding reimplements `PairingQrCodeFormat` out of tree.
+- **Keep the stale-pairing-code delete inside the daemon's `exec`, not in a oneshot.** The restart loop re-runs only the daemon command, so a oneshot would leave a spent code on disk after a crash-restart; it is also why the entrypoint path is spelled out instead of `sdk.useEntrypoint()`.

@@ -1,5 +1,5 @@
 import { sdk } from '../sdk'
-import { setDependencies } from '../dependencies'
+import { dependencies } from '../dependencies'
 import { setInterfaces } from '../interfaces'
 import { versionGraph } from '../versions'
 import { actions } from '../actions'
@@ -9,10 +9,10 @@ import { taskPairDevice } from './taskPairDevice'
 export const init = sdk.setupInit(
   restoreInit,
   versionGraph,
-  taskPairDevice,
   setInterfaces,
-  setDependencies,
   actions,
+  dependencies,
+  taskPairDevice,
 )
 
 export const uninit = sdk.setupUninit(versionGraph)

@@ -22,7 +22,9 @@ export const showPairingCode = sdk.Action.withoutInput(
     const code = await readPairingCode()
     if (!code) {
       throw new Error(
-        'No pairing code published yet. The node publishes one once it has bootstrapped Tor and started its API — watch the Pairing Code health check.',
+        i18n(
+          'No pairing code published yet. The node publishes one once it has bootstrapped Tor and started its API — watch the Pairing Code health check.',
+        ),
       )
     }
 
