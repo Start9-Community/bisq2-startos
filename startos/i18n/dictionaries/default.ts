@@ -19,6 +19,7 @@ const dict = {
 
   // init/taskPairDevice.ts
   'Pair Bisq Connect with this node once it has finished starting.': 12,
+  'No pairing code published yet. The node publishes one once it has bootstrapped Tor and started its API — watch the Pairing Code health check.': 13,
 } as const
 
 /**
