@@ -35,6 +35,6 @@ verified, tried, and decided belongs in the commit message and the PR body.
 ## This repo
 
 - **The package id is `bisq2-node`, in a repo named `bisq2-startos`.**
-- **Don't add a `Dockerfile` to get a helper script in.** The upstream image is consumed unmodified, so the logic goes in `startos/`; read the image's `entrypoint.sh` and `api_app.conf` (`UPDATING.md` has the commands) rather than assuming what it does.
+- **Don't grow the `Dockerfile` to get a helper script in.** It exists only to strip the emSign roots from the JVM's `cacerts`; package logic goes in `startos/`; read the image's `entrypoint.sh` and `api_app.conf` (`UPDATING.md` has the commands) rather than assuming what it does.
 - **Don't add an interface to `startos/interfaces.ts`, and don't re-encode the pairing blob to get one.** Bisq Connect takes its endpoint from inside the pairing code, so an interface is a second live path to the API that nothing dials, and re-encoding reimplements `PairingQrCodeFormat` out of tree.
 - **Keep the stale-pairing-code delete inside the daemon's `exec`, not in a oneshot.** The restart loop re-runs only the daemon command, so a oneshot would leave a spent code on disk after a crash-restart; it is also why the entrypoint path is spelled out instead of `sdk.useEntrypoint()`.

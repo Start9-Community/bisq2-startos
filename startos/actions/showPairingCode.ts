@@ -43,6 +43,7 @@ export const showPairingCode = sdk.Action.withoutInput(
         value: code,
         masked: true,
         copyable: true,
+        launchable: false,
         qr: true,
       },
     }
