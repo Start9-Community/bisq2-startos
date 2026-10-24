@@ -37,11 +37,11 @@ This packages the **node** only, not the Bisq 2 desktop application.
 
 ## Image and Container Runtime
 
-One image, published by the Bisq project and consumed unmodified — this package builds nothing and ships no `Dockerfile`.
+One image, published by the Bisq project. The package's `Dockerfile` adds a single layer to it, deleting the emSign roots from the JVM's `cacerts`; nothing else is changed or built. The layer is temporary and comes out once upstream ships an image whose `cacerts` no longer carries them.
 
 | Property      | Value                                                      |
 | ------------- | ---------------------------------------------------------- |
-| Image         | `ghcr.io/bisq-network/bisq2-api`                           |
+| Image         | `ghcr.io/bisq-network/bisq2-api` + root `Dockerfile`       |
 | Architectures | x86_64, aarch64                                            |
 | Entrypoint    | The image's own, preceded by the stale-pairing-code delete |
 
@@ -179,7 +179,7 @@ A restored instance needs nothing done to it and raises no task.
 
 ```yaml
 package_id: bisq2-node # note: the repo is bisq2-startos
-image: ghcr.io/bisq-network/bisq2-api
+image: ghcr.io/bisq-network/bisq2-api + root Dockerfile (emSign roots removed from cacerts)
 architectures:
   - x86_64
   - aarch64
