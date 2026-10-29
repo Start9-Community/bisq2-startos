@@ -57,10 +57,14 @@ release, see <https://github.com/bisq-network/bisq2/releases>.
 3. Rewrite `releaseNotes` in that file, in all five locales.
 4. Check whether the image's `api_app.conf` or its `entrypoint.sh` changed in a
    way this package depends on — in particular the data directory, the pairing
-   file name, and the API bind address:
+   file name, and the API bind address. Use the resolved `<tag>@<digest>`
+   reference from step 1, here and in step 5: a bare tag can answer from a stale
+   local cache, so what these commands validate would not be the bytes
+   `IMAGE` pins.
 
    ```sh
-   docker run --rm --entrypoint sh ghcr.io/bisq-network/bisq2-api:<tag> \
+   docker run --rm --entrypoint sh \
+     ghcr.io/bisq-network/bisq2-api:<tag>@<digest> \
      -c 'cat /usr/local/bin/entrypoint.sh'
    ```
 
@@ -69,11 +73,13 @@ release, see <https://github.com/bisq-network/bisq2/releases>.
 
 5. Confirm the image's entrypoint path is still `/usr/local/bin/entrypoint.sh`,
    which `startos/main.ts` spells out in the daemon command so it can clear the
-   previous run's pairing code first:
+   previous run's pairing code first. The pull matters: `docker inspect` never
+   pulls, so on its own it would read whatever the tag last meant locally.
 
    ```sh
+   docker pull ghcr.io/bisq-network/bisq2-api:<tag>@<digest>
    docker inspect --format '{{json .Config.Entrypoint}}' \
-     ghcr.io/bisq-network/bisq2-api:<tag>
+     ghcr.io/bisq-network/bisq2-api:<tag>@<digest>
    ```
 
 6. Confirm the pairing QR envelope's version byte still matches
