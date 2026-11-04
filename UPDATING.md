@@ -4,7 +4,7 @@ This package wraps the node image the Bisq project publishes,
 `ghcr.io/bisq-network/bisq2-api`. The `Dockerfile` adds one layer that deletes
 the emSign roots from the JVM's `cacerts` and fails the build if any remain;
 nothing is built from source, so a version bump is a change to the image
-reference plus the four checks below.
+reference plus the three checks below.
 
 The image tag is **not** the Bisq 2 release tag. It carries a fourth segment for
 the image build — Bisq 2 `v2.1.11` is published as `bisq2-api:2.1.11.1` — and a
@@ -51,14 +51,12 @@ release, see <https://github.com/bisq-network/bisq2/releases>.
 
    Pack with Docker: podman rejects a `tag@digest` reference.
 
-2. Set `version` in `startos/versions/current.ts` to `<tag>:0` — the image tag,
-   then the packaging revision. Bump only the `:N` suffix for changes to this
-   package that do not move the image.
-3. Rewrite `releaseNotes` in that file, in all five locales.
-4. Check whether the image's `api_app.conf` or its `entrypoint.sh` changed in a
+2. Set `version` in `startos/versions/current.ts` to `<tag>:0` — the full
+   image tag is the upstream half.
+3. Check whether the image's `api_app.conf` or its `entrypoint.sh` changed in a
    way this package depends on — in particular the data directory, the pairing
    file name, and the API bind address. Use the resolved `<tag>@<digest>`
-   reference from step 1, here and in step 5: a bare tag can answer from a stale
+   reference from step 1, here and in step 4: a bare tag can answer from a stale
    local cache, so what these commands validate would not be the bytes
    `IMAGE` pins.
 
@@ -71,7 +69,7 @@ release, see <https://github.com/bisq-network/bisq2/releases>.
    `README.md` documents the behavior this package relies on; update it if any of
    it has moved.
 
-5. Confirm the image's entrypoint path is still `/usr/local/bin/entrypoint.sh`,
+4. Confirm the image's entrypoint path is still `/usr/local/bin/entrypoint.sh`,
    which `startos/main.ts` spells out in the daemon command so it can clear the
    previous run's pairing code first. The pull matters: `docker inspect` never
    pulls, so on its own it would read whatever the tag last meant locally.
@@ -82,9 +80,7 @@ release, see <https://github.com/bisq-network/bisq2/releases>.
      ghcr.io/bisq-network/bisq2-api:<tag>@<digest>
    ```
 
-6. Confirm the pairing QR envelope's version byte still matches
+5. Confirm the pairing QR envelope's version byte still matches
    `pairingQrCodeVersion` in `startos/utils.ts` — `PairingQrCodeFormat.VERSION`
    in bisq2. A mismatch makes `readPairingCode` reject every code the node
    publishes, which surfaces as a permanently failing Pairing Code health check.
-   The cheapest check is to install the bumped package and watch that check go
-   green.
