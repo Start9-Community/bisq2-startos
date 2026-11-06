@@ -20,7 +20,7 @@ export const manifest = setupManifest({
             // re-tag cannot change what a build pulls. UPDATING.md has the
             // refresh command.
             IMAGE:
-              'ghcr.io/bisq-network/bisq2-api:2.1.14.1@sha256:7ce32c42543a0241796952155706aaa7c66c48160299ae773775f8c05adb7982',
+              'ghcr.io/bisq-network/bisq2-api:2.1.15.0@sha256:a92a692dc374e2645aba37bdade2d9c8ab042a010f0e0c7147b7ea540337c312',
           },
         },
       },
