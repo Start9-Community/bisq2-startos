@@ -11,8 +11,6 @@ A headless Bisq 2 node of your own. Bisq Connect normally trades through somebod
 
 The node joins the Bisq P2P network over its own bundled Tor, and your phone reaches it over an onion address the node creates for itself. There is no web interface to open — you drive the node from your phone, and StartOS shows you its health, its logs, and the pairing code.
 
-The package disables the JVM Base64 intrinsic to mitigate CVE-2026-114938 (Java4Shell) on affected x86 CPUs. ARM64 is unaffected. No Bisq 2-specific exploitability has been established; your node configuration and pairing are unchanged.
-
 ## Getting set up
 
 1. Start the service. The first start takes a few minutes: the node has to bootstrap Tor and publish an onion address before it can accept a pairing.
