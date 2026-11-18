@@ -57,6 +57,8 @@ The image's entrypoint runs as root, takes ownership of the data directory, and 
 
 **Everything the node does is configured inside the image.** The API bind address, the transport, the seed nodes, and the pairing behavior all come from the config bundled in the image rather than from anything here, which is why this package has no configuration surface at all.
 
+The package must keep HotSpot’s Base64 intrinsic disabled via `JAVA_TOOL_OPTIONS=-XX:-UseBASE64Intrinsics` to mitigate CVE-2026-114938 (Java4Shell) on affected x86 CPUs. ARM64 is unaffected by this CVE; its JVM also accepts the flag. This must not replace upstream `JAVA_OPTS`, including the data-directory and pairing properties, or rewrite node configuration. No Bisq 2-specific exploitability has been established.
+
 ## Volume and Data Layout
 
 One volume, holding the node's entire identity.
@@ -188,7 +190,8 @@ subcontainers:
 volumes:
   main: /data
 file_models: [] # pairing_qr_code.txt is read directly, not modelled
-startos_managed_env_vars: []
+startos_managed_env_vars:
+  - JAVA_TOOL_OPTIONS
 dependencies: []
 interfaces: {} # none; the API is loopback-only, reached over the node's own onion
 actions:
@@ -199,3 +202,9 @@ health_checks:
   - primary # displayed "Node API"
   - pairing-published # displayed "Pairing Code"
 ```
+
+## JVM mitigation regression check
+
+Run `node --test tests/jvm-options.test.cjs` through `helix-build` after `npm install`. The test uses the manifest-pinned upstream image, whose JVM and launchers are unchanged by the package's trust-store-only Docker layer. It captures the production daemon command/environment and runs it on amd64 and arm64 (Docker binfmt support required), including the entrypoint's root-to-`bisq` transition and Gradle launcher. `PrintFlagsFinal` checks the effective disabled intrinsic and a sentinel heap; JVM properties check inherited options, data directory, and pairing lifetime.
+
+Each container has no network, temporary data only, and a 15-second in-container timeout. JVM `--dry-run` loads the main class without running the application: this checks JVM startup, not Tor bootstrap, pairing publication, or trading readiness. Per-architecture child digests are resolved from the pinned index to support Docker stores that cannot load both architectures under one index reference.

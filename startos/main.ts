@@ -29,6 +29,9 @@ export const main = sdk.setupMain(async ({ effects }) => {
             '-c',
             `rm -f /data/${pairingCodeFile} && exec /usr/local/bin/entrypoint.sh`,
           ],
+          env: {
+            JAVA_TOOL_OPTIONS: '-XX:-UseBASE64Intrinsics',
+          },
         },
         ready: {
           display: i18n('Node API'),
