@@ -29,6 +29,10 @@ export const main = sdk.setupMain(async ({ effects }) => {
             '-c',
             `rm -f /data/${pairingCodeFile} && exec /usr/local/bin/entrypoint.sh`,
           ],
+          env: {
+            // Mitigates Java4Shell (CVE-2026-114938).
+            JAVA_TOOL_OPTIONS: '-XX:-UseBASE64Intrinsics',
+          },
         },
         ready: {
           display: i18n('Node API'),

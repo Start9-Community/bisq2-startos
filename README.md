@@ -57,6 +57,8 @@ The image's entrypoint runs as root, takes ownership of the data directory, and 
 
 **Everything the node does is configured inside the image.** The API bind address, the transport, the seed nodes, and the pairing behavior all come from the config bundled in the image rather than from anything here, which is why this package has no configuration surface at all.
 
+The daemon sets `JAVA_TOOL_OPTIONS=-XX:-UseBASE64Intrinsics`, which mitigates Java4Shell (CVE-2026-114938) on eligible x86-64 CPUs with AVX-512 VBMI; ARM64 is not affected. Every start logs the JVM's `Picked up JAVA_TOOL_OPTIONS: -XX:-UseBASE64Intrinsics` line. Remove the variable once the packaged image is verified to carry a JDK that fixes the CVE.
+
 ## Volume and Data Layout
 
 One volume, holding the node's entire identity.
@@ -188,7 +190,8 @@ subcontainers:
 volumes:
   main: /data
 file_models: [] # pairing_qr_code.txt is read directly, not modelled
-startos_managed_env_vars: []
+startos_managed_env_vars:
+  - JAVA_TOOL_OPTIONS
 dependencies: []
 interfaces: {} # none; the API is loopback-only, reached over the node's own onion
 actions:
